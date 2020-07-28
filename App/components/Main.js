@@ -8,38 +8,69 @@ import {
   TextInput,
   TouchableOpacity,
   KeyboardAvoidingView,
+  FlatList,
 } from 'react-native';
 import Note from './Note';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import AsyncStorage from '@react-native-community/async-storage';
 
 export default class Main extends React.Component {
 
   constructor(props) {
     super(props);
+    this.getData();
     this.state = {
       noteArray: [],
       noteText: '',
     };
   }
 
-  addNote () {
+
+
+  addNote = async () => {
+    let d = new Date();
     if (this.state.noteText) {
-       let d = new Date();
         this.state.noteArray.push({
          'date':d.getFullYear() +
          '/' + (d.getMonth() + 1 ) +
          '/' + d.getDate(),
          'note': this.state.noteText,
        });
-
       this.setState({ noteArray: this.state.noteArray});
       this.setState({ noteText: ''});
     }
+    try {
+      await AsyncStorage.setItem('noteArray', JSON.stringify(this.state.noteArray))
+      console.log('success')
+    } catch (err){
+      console.log(err);
+    }
  }
 
- deleteM (key) {
+ getData = async () => {
+   try{
+     const value = await AsyncStorage.getItem('noteArray');
+     const parValue = JSON.parse(value);
+     if (value !== null){
+        this.setState({noteArray: parValue});
+        console.log('DATA is not empty')
+    } else {
+      console.log('no data');
+    }
+   } catch (e) {
+     console.log(e);
+   }
+ }
+
+ deleteM = async (key) => {
     this.state.noteArray.splice(key, 1);
     this.setState({noteArray: this.state.noteArray});
+    try {
+      await AsyncStorage.removeItem('key')
+      console.log('deleted')
+    } catch (err){
+      console.log(err);
+    }
 
  };
 
@@ -65,7 +96,7 @@ export default class Main extends React.Component {
               placeholder=">note"
               placeholderTextColor="white" />
           </KeyboardAvoidingView>
-            <TouchableOpacity onPress={this.addNote.bind(this)} style={styles.addButton}>
+            <TouchableOpacity onPress={this.addNote} style={styles.addButton}>
               <View>
                 <FontAwesome5 name={'pen'} size={30}/>
               </View>
