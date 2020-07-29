@@ -22,6 +22,7 @@ export default class Main extends React.Component {
     this.state = {
       noteArray: [],
       noteText: '',
+      nr: 0,
     };
   }
 
@@ -35,22 +36,25 @@ export default class Main extends React.Component {
          '/' + (d.getMonth() + 1 ) +
          '/' + d.getDate(),
          'note': this.state.noteText,
+         'nr': this.state.nr++,
        });
       this.setState({ noteArray: this.state.noteArray});
       this.setState({ noteText: ''});
-    }
     try {
       await AsyncStorage.setItem('noteArray', JSON.stringify(this.state.noteArray))
       console.log('success')
+      console.log(JSON.stringify(this.state.noteArray))
     } catch (err){
       console.log(err);
     }
+  }
  }
 
  getData = async () => {
    try{
      const value = await AsyncStorage.getItem('noteArray');
      const parValue = JSON.parse(value);
+     console.log(value);
      if (value !== null){
         this.setState({noteArray: parValue});
         console.log('DATA is not empty')
@@ -63,11 +67,12 @@ export default class Main extends React.Component {
  }
 
  deleteM = async (key) => {
-    this.state.noteArray.splice(key, 1);
+
+    const removeArray = this.state.noteArray.splice(key, 1);
     this.setState({noteArray: this.state.noteArray});
     try {
-      await AsyncStorage.removeItem('key')
-      console.log('deleted')
+      AsyncStorage.clear(); // clear storage
+      await AsyncStorage.setItem('noteArray', JSON.stringify(this.state.noteArray)) // add notes without delete one
     } catch (err){
       console.log(err);
     }
@@ -83,7 +88,7 @@ export default class Main extends React.Component {
     return (
           <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.headerText}> -My Notes -</Text>
+                <Text style={styles.headerText}> - Dark Notes -</Text>
             </View>
 
         <ScrollView style={styles.scrollContainer}>
